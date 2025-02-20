@@ -38,3 +38,11 @@
   outline: none;
   padding: 10px;
 }
+
+.react-datepicker__input-container {
+  width: inherit;
+}
+
+.react-datepicker-wrapper {
+  width: 100%;
+}
