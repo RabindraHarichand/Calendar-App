@@ -2,6 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import { addHours } from "date-fns";
 
 const tempEvent = {
+  _id: new Date().getTime(),
   title: "Cumpleanos del jefe",
   notes: "Hay que comprar el pastel",
   start: new Date(),
@@ -20,16 +21,11 @@ export const calendarSlice = createSlice({
     activeEvent: null,
   },
   reducers: {
-    increment: (state /* action */) => {
-      //! https://react-redux.js.org/tutorials/quick-start
-      // Redux Toolkit allows us to write "mutating" logic in reducers. It
-      // doesn't actually mutate the state because it uses the Immer library,
-      // which detects changes to a "draft state" and produces a brand new
-      // immutable state based off those changes
-      state.counter += 1;
+    onSetActiveEvent: (state, { payload }) => {
+      state.activeEvent = payload;
     },
   },
 });
 
 // Action creators are generated for each case reducer function
-export const { increment } = calendarSlice.actions;
+export const { onSetActiveEvent } = calendarSlice.actions;
