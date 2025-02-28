@@ -1,4 +1,4 @@
-import calendarApi from "../../../src/api/calendarApi";
+import calendarApi from "../../src/api/calendarApi";
 
 describe("Pruebas en calendarApi", () => {
   test("Debe tener la configuracipn por defecto", () => {
