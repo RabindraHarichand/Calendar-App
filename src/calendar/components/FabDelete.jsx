@@ -1,5 +1,4 @@
-import { addHours } from "date-fns";
-import { useCalendarStore, useUiStore } from "../../hooks";
+import { useCalendarStore } from "../../hooks";
 
 export const FabDelete = () => {
   const { startDeletingEvent, hasEventSelected } = useCalendarStore();
