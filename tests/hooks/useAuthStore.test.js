@@ -5,6 +5,7 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 import { useAuthStore } from "../../src/hooks/useAuthStore";
 import { Provider } from "react-redux";
 import { testUserCredentials } from "../fixtures/testUser";
+import calendarApi from "../../src/api/calendarApi";
 
 const getMockStore = (initialState) => {
   return configureStore({
@@ -18,6 +19,8 @@ const getMockStore = (initialState) => {
 };
 
 describe("Pruebas en useAuthStore", () => {
+  beforeEach(() => localStorage.clear());
+
   test("debe regresar los calores por defecto", () => {
     const mockStore = getMockStore({ ...initialState });
 
@@ -39,7 +42,6 @@ describe("Pruebas en useAuthStore", () => {
   });
 
   test("startLogin debe realizar el login correctamente", async () => {
-    localStorage.clear();
     const mockStore = getMockStore({ ...notAuthenticatedState });
     const { result } = renderHook(() => useAuthStore(), {
       wrapper: ({ children }) => (
@@ -63,8 +65,6 @@ describe("Pruebas en useAuthStore", () => {
   });
 
   test("startLogin debe fallar la autenticacion", async () => {
-    localStorage.clear();
-
     const mockStore = getMockStore({ ...notAuthenticatedState });
     const { result } = renderHook(() => useAuthStore(), {
       wrapper: ({ children }) => (
@@ -75,12 +75,11 @@ describe("Pruebas en useAuthStore", () => {
     await act(async () => {
       await result.current.startLogin({
         email: "algo@google.com",
-        password: "2134fa",
+        password: "123456789",
       });
     });
 
     const { errorMessage, status, user } = result.current;
-
     expect(localStorage.getItem("token")).toBe(null);
     expect({ errorMessage, status, user }).toEqual({
       errorMessage: "Crendiciales Incorrectas",
@@ -89,5 +88,43 @@ describe("Pruebas en useAuthStore", () => {
     });
 
     await waitFor(() => expect(result.current.errorMessage).toBe(undefined));
+  });
+
+  test("startRegister debe crear un usuario", async () => {
+    const newUser = {
+      email: "algo@google.com",
+      password: "2134fa",
+      name: "TestUser2",
+    };
+
+    const mockStore = getMockStore({ ...notAuthenticatedState });
+    const { result } = renderHook(() => useAuthStore(), {
+      wrapper: ({ children }) => (
+        <Provider store={mockStore}>{children}</Provider>
+      ),
+    });
+
+    const spy = jest.spyOn(calendarApi, "post").mockReturnValue({
+      data: {
+        ok: true,
+        uid: "ALGUN-ID",
+        name: "TesUser",
+        token: "ALGUN-TOKEN",
+      },
+    });
+
+    await act(async () => {
+      await result.current.startRegister(newUser);
+    });
+
+    const { errorMessage, status, user } = result.current;
+
+    expect({ errorMessage, status, user }).toEqual({
+      errorMessage: undefined,
+      status: "authenticated",
+      user: { name: "TesUser", uid: "ALGUN-ID" },
+    });
+
+    spy.mockRestore();
   });
 });
