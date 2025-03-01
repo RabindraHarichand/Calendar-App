@@ -148,4 +148,47 @@ describe("Pruebas en useAuthStore", () => {
       user: {},
     });
   });
+
+  test("checkAuthToken debe fallar si no hay token", async () => {
+    const mockStore = getMockStore({ ...initialState });
+    const { result } = renderHook(() => useAuthStore(), {
+      wrapper: ({ children }) => (
+        <Provider store={mockStore}>{children}</Provider>
+      ),
+    });
+
+    await act(async () => {
+      await result.current.checkAuthToken();
+    });
+
+    const { errorMessage, status, user } = result.current;
+    expect({ errorMessage, status, user }).toEqual({
+      errorMessage: undefined,
+      status: "not-authenticated",
+      user: {},
+    });
+  });
+
+  test("checkAuthToken debe autenticar el usuario si hay un token", async () => {
+    const { data } = await calendarApi.post("/auth", testUserCredentials);
+    localStorage.setItem("token", data.token);
+
+    const mockStore = getMockStore({ ...initialState });
+    const { result } = renderHook(() => useAuthStore(), {
+      wrapper: ({ children }) => (
+        <Provider store={mockStore}>{children}</Provider>
+      ),
+    });
+
+    await act(async () => {
+      await result.current.checkAuthToken();
+    });
+
+    const { errorMessage, status, user } = result.current;
+    expect({ errorMessage, status, user }).toEqual({
+      errorMessage: undefined,
+      status: "authenticated",
+      user: { name: "Fernando", uid: "67bb2b6b1c6dc63d53bd70d5" },
+    });
+  });
 });
